@@ -2,7 +2,7 @@
 <html>
 <head>
     <meta name ="viewport" content ="width=device-width, initial-scale=1.0">
-    <title> Weath App</title>
+    <title> Weather App</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -35,6 +35,31 @@
         </div>
     </div>
 </div>
+
+<script>
+
+    const apiKey = "9e598161662fa90d10571de2f74fef68";
+    const apiUrl = "https://api.openweathermap.org/data/2.5/weather?units=metric&q=Berlin";
+    
+    async function checkWeather(){
+        const response = await fetch(apiUrl + `&appid=${apiKey}`);
+        var data = await response.json();
+    
+        console.log(data);
+
+        document.querySelector(".city").innerHTML = data.name;
+        document.querySelector(".temp").innerHTML = Math.round(data.main.temp) + "°F";
+        document.querySelector(".humidity").innerHTML = data.main.humidity + "%";
+        document.querySelector(".wind").innerHTML = data.wind.speed + "mph";
+
+
+
+
+    }
+    
+    checkWeather();
+    </script>
+
 
 </body>
 </html>
