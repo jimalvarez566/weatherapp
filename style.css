@@ -7,18 +7,27 @@
 }
 
 body {
-    background:#222;
+    background: #222;
+    height: 100vh; /* Full viewport height */
+    margin: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
-.card{
-    Width: 100%;
-    max-width: : 470px;
+
+.card {
+    width: 100%; /* Full width of the screen */
+    height: 100vh; /* Full height of the screen */
     background: linear-gradient(135deg, #00feba, #5b548a);
-    color: #fff;
-    margin: 100px auto 0;
-    border-radius: 20px;
+    color: #fff; /* Ensure text color stays white */
+    border-radius: 0px; /* Optional: remove border radius to fill the entire screen */
     padding: 40px 35px;
     text-align: center;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
 }
+
 .search{
     width 50%;
     display: flex;
@@ -50,10 +59,33 @@ body {
 .search button img{
     width: 16px;
 }
-.weather-icon{
+
+#location-btn {
+    background: #ebfffc;
+    border: 0;
+    outline: 0;
+    border-radius: 50%;
+    width: 60px;
+    height: 60px;
+    cursor: pointer;
+    margin-left: 10px;
+}
+
+#location-btn img {
+    width: 16px;
+}
+
+
+.weather-icon {
     width: 170px;
     margin-top: 30px;
+    transition: transform 0.2s ease-in-out; /* Smooth transition for the jump */
 }
+
+.weather-icon:hover {
+    transform: scale(1.2); /* Enlarge the icon slightly when hovered */
+}
+
 .weather h1{
     font-size: 80px;
     font-weight: 500;

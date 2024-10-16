@@ -2,15 +2,16 @@
 <html>
 <head>
     <meta name ="viewport" content ="width=device-width, initial-scale=1.0">
-    <title> Weather App</title>
+    <title>Weather App</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
 <div class="card">
     <div class="search">
-        <input type="text" placeholder="Enter city name" spellcheck = "false">
+        <input type="text" placeholder="Enter city name" spellcheck="false">
         <button><img src="images/search.png"></button>
+        <button id="location-btn"><img src="images/location.png"></button> <!-- Location button -->
     </div>
     <div class="weather">
         <img src="images/rain.png" class ="weather-icon">
@@ -35,39 +36,8 @@
     </div>
 </div>
 
-<script>
-
-    const apiKey = "9e598161662fa90d10571de2f74fef68";
-    const apiUrl = "https://api.openweathermap.org/data/2.5/weather?units=metric&q=";
-
-    const searchBox = document.querySelector(".search input");
-    const searchBtn = document.querySelector(".search button");
-
-    
-    async function checkWeather(city){
-        const response = await fetch(apiUrl + city + `&appid=${apiKey}`);
-        var data = await response.json();
-    
-        console.log(data);
-
-        document.querySelector(".city").innerHTML = data.name;
-        document.querySelector(".temp").innerHTML = Math.round(data.main.temp) + "°C";
-        document.querySelector(".humidity").innerHTML = data.main.humidity + "%";
-        document.querySelector(".wind").innerHTML = data.wind.speed + " km/h";
-
-
-
-
-    }
-
-
-    searchBtn.addEventListener("click", ()=>{
-        checkWeather(searchBox.value);
-    })
-    
-    checkWeather();
-    </script>
-
+<!-- Link the external JavaScript file -->
+<script src="weather.js"></script>
 
 </body>
 </html>
