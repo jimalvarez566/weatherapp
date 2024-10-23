@@ -115,4 +115,95 @@ body {
     font-size: 30px;
     margin-top: -6px;
 }
+
+.forecast {
+    margin-top: 20px;
+    display: flex;
+    flex-wrap: wrap;  /* This ensures the forecast items wrap to the next line if needed */
+    justify-content: space-between;
+    gap: 10px; /* Adds spacing between forecast items */
+}
+
+.forecast-day {
+    text-align: center;
+    width: 120px;
+    background: transparent;
+    padding: 10px;
+    border: 2px solid white;
+    border-radius: 10px;
+    color: #fff;
+    box-sizing: border-box;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Optional shadow */
+}
+
+.forecast-day img {
+    width: 50px;
+    height: 50px;
+}
+
+.forecast-day p {
+    margin: 5px 0;
+    font-size: 14px;
+}
+
+.unit-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 20px;
+}
+
+.switch {
+    position: relative;
+    display: inline-block;
+    width: 60px;
+    height: 34px;
+}
+
+.switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ccc;
+    transition: .4s;
+    border-radius: 34px;
+}
+
+.slider:before {
+    position: absolute;
+    content: "";
+    height: 26px;
+    width: 26px;
+    left: 4px;
+    bottom: 4px;
+    background-color: white;
+    transition: .4s;
+    border-radius: 50%;
+}
+
+input:checked + .slider {
+    background-color: #2196F3;
+}
+
+input:checked + .slider:before {
+    transform: translateX(26px);
+}
+
+p#unit-label {
+    margin-left: 15px;
+    font-size: 18px;
+    color: white;
+}
+
+
+
 /*14:41 go back to that for weather wind speed text change*/
