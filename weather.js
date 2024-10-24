@@ -1,114 +1,90 @@
 const apiKey = "9e598161662fa90d10571de2f74fef68";
-const apiUrl = "https://api.openweathermap.org/data/2.5/weather?units=metric&q=";
-
+const apiUrl = "https://api.openweathermap.org/data/2.5/weather?";
 const searchBox = document.querySelector(".search input");
 const searchBtn = document.querySelector(".search button");
 const locationBtn = document.getElementById("location-btn");
 
-let unit = "metric"; // Default unit is Celsius (metric)
 const unitSwitch = document.getElementById("unit-switch");
 const unitLabel = document.getElementById("unit-label");
 
-let cachedCityName = "";  // Cache the city name
+// Cache for weather data
+let cachedWeatherDataMetric = null;
+let cachedWeatherDataImperial = null;
+let cachedCityName = "";
 
-// Add an event listener to toggle between Celsius and Fahrenheit
+let unit = "metric"; // Default to Celsius (metric)
+
+// Toggle between Celsius and Fahrenheit
 unitSwitch.addEventListener("change", () => {
-    // Switch between Celsius and Fahrenheit
-    if (unitSwitch.checked) {
-        unit = "imperial"; // Fahrenheit
-        unitLabel.innerHTML = "°F";
-    } else {
-        unit = "metric"; // Celsius
-        unitLabel.innerHTML = "°C";
+    unit = unitSwitch.checked ? "imperial" : "metric";
+    unitLabel.innerHTML = unit === "imperial" ? "°F" : "°C";
+    
+    // Update UI with cached data without re-fetching the current weather
+    if (unit === "imperial" && cachedWeatherDataImperial) {
+        updateUI(cachedWeatherDataImperial);
+    } else if (unit === "metric" && cachedWeatherDataMetric) {
+        updateUI(cachedWeatherDataMetric);
     }
 
-    // Re-fetch weather and forecast data
-    if (cachedCityName) {
-        // Use cached city name to re-fetch the weather
-        checkWeather(cachedCityName);
-    } else {
-        // Use geolocation if no city is cached
-        navigator.geolocation.getCurrentPosition(
-            (position) => {
-                const lat = position.coords.latitude;
-                const lon = position.coords.longitude;
-                checkWeatherByLocation(lat, lon);
-            }
-        );
+    // Re-fetch and re-render the forecast for the new unit
+    if (cachedWeatherDataMetric) {
+        const lat = cachedWeatherDataMetric.coord.lat;
+        const lon = cachedWeatherDataMetric.coord.lon;
+        fetchAndRenderForecast(lat, lon);
     }
 });
 
-// Check weather by city name (Search)
+
+// Fetch weather data by city name
 async function checkWeather(city) {
-    // Show loading indicator or handle UI changes (optional)
-    document.querySelector(".city").innerHTML = "Loading...";
-
     try {
-        const response = await fetch(apiUrl + city + `&units=${unit}&appid=${apiKey}`);
-        const data = await response.json();
+        const metricResponse = await fetch(apiUrl + `q=${city}&units=metric&appid=${apiKey}`);
+        const imperialResponse = await fetch(apiUrl + `q=${city}&units=imperial&appid=${apiKey}`);
+        
+        const metricData = await metricResponse.json();
+        const imperialData = await imperialResponse.json();
 
-        console.log(data);
+        // Cache both metric and imperial data
+        cachedWeatherDataMetric = metricData;
+        cachedWeatherDataImperial = imperialData;
+        cachedCityName = metricData.name;  // Cache city name
 
-        // Cache the city name to avoid changes when toggling units
-        cachedCityName = data.name;
+        // Update the UI based on the current unit
+        updateUI(unit === "metric" ? cachedWeatherDataMetric : cachedWeatherDataImperial);
 
-        // Update UI with current weather data
-        document.querySelector(".city").innerHTML = cachedCityName;
-        document.querySelector(".temp").innerHTML = Math.round(data.main.temp) + (unit === "metric" ? "°C" : "°F");
-        document.querySelector(".humidity").innerHTML = data.main.humidity + "%";
-        document.querySelector(".wind").innerHTML = data.wind.speed + " " + (unit === "metric" ? "km/h" : "mph");
-
-        // Fetch and render the 5-day forecast
-        const lat = data.coord.lat;
-        const lon = data.coord.lon;
+        // Fetch and render the forecast
+        const lat = metricData.coord.lat;
+        const lon = metricData.coord.lon;
         await fetchAndRenderForecast(lat, lon);
-
     } catch (error) {
         console.error("Error fetching weather data:", error);
         document.querySelector(".city").innerHTML = "City not found!";
     }
 }
 
-// Check weather by current location
-async function checkWeatherByLocation(lat, lon) {
-    try {
-        // Fetch the current weather using the selected unit
-        const cityResponse = await fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&units=${unit}&appid=${apiKey}`);
-        const cityData = await cityResponse.json();
+// Update the UI with weather data
+function updateUI(data) {
+    document.querySelector(".city").innerHTML = cachedCityName;
+    document.querySelector(".temp").innerHTML = Math.round(data.main.temp) + (unit === "metric" ? "°C" : "°F");
+    document.querySelector(".humidity").innerHTML = data.main.humidity + "%";
+    document.querySelector(".wind").innerHTML = convertWindSpeed(data.wind.speed) + (unit === "metric" ? " km/h" : " mph");
+}
 
-        // Cache the city name on the first request
-        if (!cachedCityName) {
-            cachedCityName = cityData.name;
-        }
-
-        // Always display the cached city name, avoiding misspelling or changes
-        document.querySelector(".city").innerHTML = cachedCityName;
-
-        // Fetch the 5-day/3-hour forecast in the selected unit
-        await fetchAndRenderForecast(lat, lon);
-
-        // Update current weather display with correct unit
-        document.querySelector(".temp").innerHTML = Math.round(cityData.main.temp) + (unit === "metric" ? "°C" : "°F");
-        document.querySelector(".humidity").innerHTML = cityData.main.humidity + "%";
-        document.querySelector(".wind").innerHTML = cityData.wind.speed + " " + (unit === "metric" ? "km/h" : "mph");
-
-    } catch (error) {
-        console.error("Error fetching weather data by location:", error);
-        document.querySelector(".city").innerHTML = "Location not found!";
+// Convert wind speed based on units
+function convertWindSpeed(speed) {
+    if (unit === "metric") {
+        return (speed * 3.6).toFixed(2); // Convert m/s to km/h
+    } else {
+        return (speed * 2.237).toFixed(2); // Convert m/s to mph
     }
 }
 
 // Fetch and render the 5-day/3-hour forecast
 async function fetchAndRenderForecast(lat, lon) {
     try {
-        // Fetch the 5-day/3-hour forecast using the selected unit
         const forecastResponse = await fetch(`https://api.openweathermap.org/data/2.5/forecast?lat=${lat}&lon=${lon}&units=${unit}&appid=${apiKey}`);
         const forecastData = await forecastResponse.json();
 
-        // Log the forecast data for debugging
-        console.log("5-day/3-hour forecast data:", forecastData);
-
-        // Update the 5-day forecast display
         let forecastHTML = "";
         forecastData.list.forEach((forecast, index) => {
             if (index % 8 === 0) { // Show forecast for every 24 hours
@@ -133,11 +109,12 @@ async function fetchAndRenderForecast(lat, lon) {
     }
 }
 
+
 // Event listener for search button
 searchBtn.addEventListener("click", () => {
     const city = searchBox.value;
     if (city) {
-        checkWeather(city);  // Fetch weather based on the search query
+        checkWeather(city);
     }
 });
 
@@ -148,11 +125,6 @@ locationBtn.addEventListener("click", () => {
             (position) => {
                 const lat = position.coords.latitude;
                 const lon = position.coords.longitude;
-
-                // Log latitude and longitude for debugging
-                console.log("Current position:", lat, lon); 
-
-                // Fetch weather based on current location
                 checkWeatherByLocation(lat, lon);
             },
             (error) => {
@@ -163,3 +135,28 @@ locationBtn.addEventListener("click", () => {
         alert("Geolocation is not supported by your browser.");
     }
 });
+
+// Fetch weather data by current location
+async function checkWeatherByLocation(lat, lon) {
+    try {
+        const metricResponse = await fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&units=metric&appid=${apiKey}`);
+        const imperialResponse = await fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&units=imperial&appid=${apiKey}`);
+
+        const metricData = await metricResponse.json();
+        const imperialData = await imperialResponse.json();
+
+        // Cache both metric and imperial data
+        cachedWeatherDataMetric = metricData;
+        cachedWeatherDataImperial = imperialData;
+        cachedCityName = metricData.name;
+
+        // Update the UI based on the current unit
+        updateUI(unit === "metric" ? cachedWeatherDataMetric : cachedWeatherDataImperial);
+
+        // Fetch and render the forecast
+        await fetchAndRenderForecast(lat, lon);
+    } catch (error) {
+        console.error("Error fetching weather data by location:", error);
+        document.querySelector(".city").innerHTML = "Location not found!";
+    }
+}
