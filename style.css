@@ -13,6 +13,7 @@ body {
     display: flex;
     justify-content: center;
     align-items: center;
+    overflow-y: auto;
 }
 
 .card {
@@ -23,9 +24,33 @@ body {
     border-radius: 0px; /* Optional: remove border radius to fill the entire screen */
     padding: 40px 35px;
     text-align: center;
+    overflow-y: auto; /* Allow scrolling within the card if content overflows */
     display: flex;
     flex-direction: column;
     justify-content: space-between;
+}
+
+/* Weather map */
+#map {
+    height: 300px; /* Set a fixed height or adjust as needed */
+    width: 100%;
+    overflow: hidden; /* Ensure content doesn’t exceed container */
+    margin-top: 20px;
+}
+
+/* Button to toggle map */
+#toggle-map {
+    margin-top: 20px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+#toggle-map:hover {
+    background-color: #45a049;
 }
 
 .search{

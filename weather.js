@@ -3,6 +3,7 @@ const apiUrl = "https://api.openweathermap.org/data/2.5/weather?";
 const searchBox = document.querySelector(".search input");
 const searchBtn = document.querySelector(".search button");
 const locationBtn = document.getElementById("location-btn");
+const saveCityButton = document.getElementById("save-city-button"); // Save button for saving the current city
 
 const unitSwitch = document.getElementById("unit-switch");
 const unitLabel = document.getElementById("unit-label");
@@ -33,7 +34,6 @@ unitSwitch.addEventListener("change", () => {
         fetchAndRenderForecast(lat, lon);
     }
 });
-
 
 // Fetch weather data by city name
 async function checkWeather(city) {
@@ -109,6 +109,72 @@ async function fetchAndRenderForecast(lat, lon) {
     }
 }
 
+// Toggle map visibility
+const toggleMapBtn = document.getElementById("toggle-map");
+const mapContainer = document.getElementById("map");
+let isMapVisible = false;
+let map; // Leaflet map instance
+
+toggleMapBtn.addEventListener("click", function () {
+    if (isMapVisible) {
+        mapContainer.style.display = "none";
+        toggleMapBtn.innerHTML = "Show Weather Map";
+        isMapVisible = false;
+    } else {
+        mapContainer.style.display = "block";
+        toggleMapBtn.innerHTML = "Hide Weather Map";
+        isMapVisible = true;
+        initializeMap(); // Initialize the map when first shown
+
+        // Invalidate size to force proper rendering
+        if (map) {
+            setTimeout(() => {
+                map.invalidateSize(); // Force Leaflet to recheck container size
+            }, 200);
+        }
+    }
+});
+
+// Function to initialize Leaflet map
+function initializeMap() {
+    if (!map) {
+        map = L.map('map').setView([51.505, -0.09], 5); // Default map center and zoom level
+
+        // Add base map layer (OpenStreetMap)
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 18,
+        }).addTo(map);
+
+        // Add OpenWeatherMap weather layer (e.g., Clouds)
+        const cloudLayer = L.tileLayer(`https://tile.openweathermap.org/map/clouds_new/{z}/{x}/{y}.png?appid=${apiKey}`, {
+            maxZoom: 18,
+            attribution: '&copy; <a href="https://openweathermap.org/">OpenWeatherMap</a>'
+        });
+
+        // Add additional layers for different weather data
+        const temperatureLayer = L.tileLayer(`https://tile.openweathermap.org/map/temp_new/{z}/{x}/{y}.png?appid=${apiKey}`, {
+            maxZoom: 18,
+            attribution: '&copy; <a href="https://openweathermap.org/">OpenWeatherMap</a>'
+        });
+
+        const precipitationLayer = L.tileLayer(`https://tile.openweathermap.org/map/precipitation_new/{z}/{x}/{y}.png?appid=${apiKey}`, {
+            maxZoom: 18,
+            attribution: '&copy; <a href="https://openweathermap.org/">OpenWeatherMap</a>'
+        });
+
+        // Add layer control to toggle between weather layers
+        const baseMaps = {
+            "Clouds": cloudLayer,
+            "Temperature": temperatureLayer,
+            "Precipitation": precipitationLayer
+        };
+
+        L.control.layers(baseMaps).addTo(map);
+
+        // Set the default layer to Clouds
+        cloudLayer.addTo(map);
+    }
+}
 
 // Event listener for search button
 searchBtn.addEventListener("click", () => {
